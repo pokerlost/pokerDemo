@@ -17,7 +17,16 @@ from pokerdemo.protocol.models import Snapshot
 
 
 class ServerConsole(App):
-    CSS = CSS + "\nInput, Input:focus { height: 1; border: none; padding: 0 1; }"
+    CSS = (
+        CSS
+        + """
+    Input, Input:focus { height: 1; border: none; padding: 0 1; }
+    #feedback { color: #94a3b8; }
+    #feedback.error { color: #ffb4ac; }
+    #feedback.success { color: #7bf0ba; }
+    """
+    )
+    ENABLE_COMMAND_PALETTE = False
     TITLE = "PokerDemo · WebSocket server"
     BINDINGS: ClassVar = [
         Binding("ctrl+q", "quit", "Stop server"),
@@ -41,7 +50,11 @@ class ServerConsole(App):
             markup=False,
         )
         yield Static(id="activity", markup=False)
-        yield Static("Ready. Players press S, or type start below.", id="feedback", markup=False)
+        yield Static(
+            "Play in Alice/Bob panels; use this field for server commands.",
+            id="feedback",
+            markup=False,
+        )
         yield Input(placeholder="Server command: status / start / settle / quit", id="command")
         yield Footer()
 
@@ -82,9 +95,15 @@ class ServerConsole(App):
                 message = (
                     "Commands: status, start, settle, quit. Game actions belong to player panels."
                 )
-            self.query_one("#feedback", Static).update(message)
+            feedback = self.query_one("#feedback", Static)
+            feedback.set_class(False, "error")
+            feedback.set_class(command in {"start", "settle", "status"}, "success")
+            feedback.update(message)
         except (ValueError, RuntimeError, PokerError) as error:
-            self.query_one("#feedback", Static).update(f"Rejected: {error}")
+            feedback = self.query_one("#feedback", Static)
+            feedback.set_class(False, "success")
+            feedback.set_class(True, "error")
+            feedback.update(f"Rejected: {error}")
 
 
 def run_server(application: PokerApplication, host: str, port: int, *, dashboard: bool) -> None:

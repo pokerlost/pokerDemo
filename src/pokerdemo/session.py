@@ -417,7 +417,8 @@ def record(settings: Settings, output: Path) -> None:
 
         def mark(name: str) -> None:
             capture.drain(delay)
-            markers[name] = round(time.monotonic() - capture.started, 4)
+            # Select a stable moment inside the display pause, before the next redraw.
+            markers[name] = round(time.monotonic() - capture.started - delay / 2, 4)
             for role, pane in manifest["panes"].items():
                 pane_capture = session.command("capture-pane", "-p", "-t", pane, check=False)
                 if pane_capture.returncode == 0:

@@ -35,6 +35,7 @@ make demo-attach
 make demo-stop
 ```
 
+Use a terminal of about 160 columns by 50 rows to see all three dashboards clearly.
 The server is above two independent clients. Switch panes with `Ctrl+B`, then an
 arrow. `Ctrl+B`, then `D` detaches; `demo-attach` returns. Only this workspace's
 `.local/demo/tmux.sock` and `pokerdemo` session are affected by stop. Closing or

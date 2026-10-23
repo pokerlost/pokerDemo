@@ -21,8 +21,12 @@ and does not stand in for tests that were not run.
 - Decide version, promotion and tags explicitly, preserving existing history and
   branch protection.
 
-Local recordings, diagnostics and dependency artifacts stay excluded from Git,
+Runtime recordings, diagnostics and dependency artifacts stay excluded from Git,
 distributions and releases. Preserve MIT source notices and
 [migration provenance](migration-source.json).
+
+The owner-authorized README preview in `docs/assets/` is the single published media
+copy. It records its source and checksum; it is excluded from package distributions
+and Docker contexts. No release asset upload is implied.
 
 [Development](development.md) · [Versions](versioning.md) · [Demo guide](demo.md)

@@ -14,7 +14,10 @@ make lint
 Lint performs Ruff checks and format verification. It does not install dependencies,
 start a game, run tests or build the engine. Review the full diff, staged paths and
 secrets before an authorized commit and explicit `git push origin dev`.
-Keep recordings, logs, wheels and private backups out of staged files.
+Keep runtime recordings, logs, wheels and private backups out of staged files.
+The README preview in `docs/assets/` is a separately authorized publication of one
+reviewed synthetic GIF. Match its hash to the completed local receipt, preserve the
+source commit in its provenance record, and do not copy casts or diagnostic frames.
 
 After changing application code, explicitly reinstall it before a recorded run:
 

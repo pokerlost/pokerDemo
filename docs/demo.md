@@ -140,9 +140,11 @@ Each run creates:
 └── recording.json
 ```
 
-Plain pane captures may also be retained for diagnostics. All files remain local,
-ignored by Git and excluded from packages and Docker contexts. `POKERDEMO_OUTPUT_ROOT`
-can choose a subdirectory beneath this workspace's `.local/recordings/`; each run
+Plain pane captures may also be retained for diagnostics. Generated output remains
+local, ignored by Git and excluded from packages and Docker contexts. The README's
+separately reviewed preview is one deliberately published GIF, with provenance in
+`docs/assets/demo.json`; source casts, diagnostic frames and logs are not copied.
+`POKERDEMO_OUTPUT_ROOT` can choose a subdirectory beneath this workspace's `.local/recordings/`; each run
 still gets its own ID. No output is uploaded.
 
 The seeded scenario drives the actual server and client consoles through normal

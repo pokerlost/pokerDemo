@@ -1,0 +1,20 @@
+{
+  "sourceCommit": "9d330464e3d4d4c571444945c9dd5c3052f163dc",
+  "demoVersion": "0.2.0.dev0",
+  "gifSha256": "4216611e32ec5f05b8ab0529a2711d2650e49e58378d6b018015d634c4250403",
+  "engineWheelSha256": "13a1a57f6c61860cf1c1b89d1a4db624eda8d8cad132bdf7d61f0e94ab798ee3",
+  "syntheticPlayers": [
+    "alice",
+    "bob"
+  ],
+  "views": {
+    "server": "public",
+    "observer": "public",
+    "players": "own-player"
+  },
+  "capture": "Real terminal replay; the first raise uses the client amount picker.",
+  "verification": "Observed scenario completed; full test suite and CI were not run.",
+  "width": 1555,
+  "height": 1142,
+  "frames": 46
+}

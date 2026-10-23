@@ -70,7 +70,10 @@ legacy schema 1 remains valid only for public captures. The receipt records sour
 SHA, installed package/wheel checks, tools,
 timestamps, scenario observations and file hashes. Capture and rendering have
 separate completion flags. Failure and completion clean up the recording session.
-All output stays beneath `.local/recordings/<run-id>/`.
+All recording output stays beneath `.local/recordings/<run-id>/`. A separate,
+owner-authorized copy of one reviewed GIF and its short provenance record lives in
+`docs/assets/` for README display. The recorder never writes or publishes that copy;
+media is excluded from packages and Docker contexts.
 
 [Demo guide](demo.md) · [Client](client.md) · [Project contract](../PROJECT.md) ·
 [Transfer provenance](migration-source.json)

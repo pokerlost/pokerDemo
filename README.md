@@ -6,6 +6,14 @@ PokerDemo demonstrates the installed [PokerEngine](https://github.com/pokerlost/
 Python API. The engine owns poker rules, legal actions and settlement. This application
 owns connections, typed messages, terminal interaction and local recording.
 
+## 🎮 Demo
+
+![PokerDemo: two players with visible own cards, a shared board and an action menu](docs/assets/demo.gif)
+
+A real synthetic hand, including the raise picker, showdown and payouts.
+Each player receives only their own cards; the server monitor stays public.
+[Run it locally](#quick-start) · [Recording provenance](docs/assets/demo.json).
+
 | Layer | Library | Responsibility |
 | --- | --- | --- |
 | Transport | websockets | WebSocket connections and pushed table updates |
@@ -68,8 +76,10 @@ the server monitor stays public. To hide hole cards instead:
 POKERDEMO_RECORD_SHOW_CARDS=false make demo-record
 ```
 
-Recording uses a separate session and leaves a manual game alone. No recordings
-are uploaded or included in Git or distributions. See [recording and troubleshooting](docs/demo.md#record-a-game).
+Recording uses a separate session and leaves a manual game alone. Commands keep
+all output local and never upload it. The single reviewed GIF above is a deliberately
+published README preview; source casts, diagnostic frames and logs stay local.
+Media is excluded from distributions. See [recording and troubleshooting](docs/demo.md#record-a-game).
 
 ## How it fits together
 

@@ -27,7 +27,7 @@ pokerDemo = "pokerdemo.cli:app"
 dev = ["mypy>=2.3,<3", "ruff==0.16.4", "packaging>=25,<27", "typer==0.27.3", "pydantic>=2.12,<3", "hatchling>=1.27,<2", "pytest>=9,<10", "pytest-cov>=7,<8"]
 
 [tool.hatch.build]
-exclude = [".aws", ".aws/**", ".agents", ".agents/**", ".codex", ".codex/**", ".serena", ".serena/**", ".vscode", ".vscode/**", ".local", ".local/**", "backups", "backups/**", ".env", ".env.*", "!.env.example", "/core.[0-9]*", "/.coverage", "/.coverage.*"]
+exclude = ["/docs/assets", "/docs/assets/**", ".aws", ".aws/**", ".agents", ".agents/**", ".codex", ".codex/**", ".serena", ".serena/**", ".vscode", ".vscode/**", ".local", ".local/**", "backups", "backups/**", ".env", ".env.*", "!.env.example", "/core.[0-9]*", "/.coverage", "/.coverage.*"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pokerdemo"]

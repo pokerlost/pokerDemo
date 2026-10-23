@@ -19,3 +19,4 @@ backups
 coverage
 /core.[0-9]*
 .vscode
+docs/assets

@@ -90,7 +90,7 @@ make demo-record
 ```
 
 This one command runs the actual server and two public-only clients, enters commands
-through tmux, captures its real PTY, replays it with agg and extracts four frames:
+through tmux, captures its real PTY, replays it with agg and selects four frames:
 
 ```text
 .local/recordings/<run-id>/
@@ -113,7 +113,10 @@ The seeded synthetic scenario covers normal streets/showdown, a fold, all-in,
 invalid amount/input, out-of-turn rejection and disconnect. The engine determines
 legal actions and results. Receipt observations and completion flags show what
 actually happened. Both recorded clients hide private cards; manual clients retain
-their own permitted views. Frames are unchanged PTY replay frames, not desktop screenshots.
+their own permitted views. The GIF preserves the recording timeline with a 1 fps cap
+to group terminal redraws.
+The four PNGs use agg `--select` at stable timestamps from the same `session.cast`,
+then lossless Pillow conversion. They are PTY replay frames, not desktop screenshots.
 
 The recorder checks clean committed source, exact installed demo files, engine wheel
 metadata/bytes and tool hashes before and after capture. Failure and completion stop

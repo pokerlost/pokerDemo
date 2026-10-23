@@ -11,7 +11,8 @@ It obtains legal ranges from the server; it does not implement poker rules.
 
 `session.py` also drives a separate seeded recording through the same client input.
 The PTY recorder preserves real tmux bytes and timing as asciicast v2. `render.py`
-uses official agg to replay the stream and Pillow to extract four unchanged frames.
+uses official agg to replay the stream and select four exact stable moments from
+the same cast; Pillow converts those replay frames to PNG. The GIF uses a 1 fps cap.
 The receipt records source SHA, exact installed wheel bytes, tool versions/hashes,
 timestamps, commands, state observations and output hashes. Frames are terminal
 replay images, not desktop screenshots.

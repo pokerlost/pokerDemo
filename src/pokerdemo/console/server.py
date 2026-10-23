@@ -17,7 +17,7 @@ from pokerdemo.protocol.models import Snapshot
 
 
 class ServerConsole(App):
-    CSS = CSS
+    CSS = CSS + "\nInput, Input:focus { height: 1; border: none; padding: 0 1; }"
     TITLE = "PokerDemo · WebSocket server"
     BINDINGS: ClassVar = [
         Binding("ctrl+q", "quit", "Stop server"),

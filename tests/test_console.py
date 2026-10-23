@@ -3,7 +3,8 @@
 import asyncio
 import threading
 
-from textual.widgets import Input, Static
+from textual.events import Key
+from textual.widgets import Footer, Input, Static
 
 from pokerdemo.console.client import PlayerConsole
 from pokerdemo.console.server import ServerConsole
@@ -49,7 +50,27 @@ def test_player_hotkeys_command_input_and_private_live_view() -> None:
                     )
                     assert (game.game.state_version, game.game.event_cursor) == before
                     assert app.focused is None
-                    assert app.query_one(Input).region.bottom <= app.size.height
+                    command = app.query_one(Input)
+                    assert command.content_region.height >= 1
+                    assert command.region.bottom <= app.query_one(Footer).region.y
+                    app.query_one("#feedback", Static).update("")
+                    # One PTY read may contain the focus key and the whole command.
+                    # Those letters must never fire table hotkeys before focus settles.
+                    for character in ":raise invalid":
+                        key = (
+                            "colon"
+                            if character == ":"
+                            else "space"
+                            if character == " "
+                            else character
+                        )
+                        app.post_message(Key(key, character))
+                    app.post_message(Key("enter", "\r"))
+                    await pilot.pause(0.3)
+                    assert "REJECTED [raise invalid]" in str(
+                        app.query_one("#feedback", Static).render()
+                    )
+                    assert (game.game.state_version, game.game.event_cursor) == before
 
             asyncio.run(exercise())
         finally:
@@ -67,13 +88,15 @@ def test_server_console_operator_commands_fit_small_pane() -> None:
 
         async def exercise() -> None:
             app = ServerConsole(server)
-            async with app.run_test(size=(141, 12)) as pilot:
+            async with app.run_test(size=(141, 11)) as pilot:
                 await pilot.press(*"status", "enter")
                 assert "2 players connected" in str(app.query_one("#feedback", Static).render())
                 await pilot.press(*"start", "enter")
                 await pilot.pause(0.2)
                 assert game.game.phase.value == "betting"
                 assert "YOUR CARDS" not in str(app.query_one("#summary", Static).render())
-                assert app.query_one(Input).region.bottom <= app.size.height
+                command = app.query_one(Input)
+                assert command.content_region.height >= 1
+                assert command.region.bottom <= app.query_one(Footer).region.y
 
         asyncio.run(exercise())

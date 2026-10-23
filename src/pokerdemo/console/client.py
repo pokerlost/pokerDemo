@@ -20,7 +20,7 @@ class PlayerConsole(App):
     AUTO_FOCUS = None
     BINDINGS: ClassVar = [
         Binding("ctrl+q", "quit", "Quit"),
-        Binding("escape", "table_focus", "Hotkeys"),
+        Binding("escape", "table_focus", "Hotkeys", priority=True),
         Binding("s", "play('start')", "Start"),
         Binding("c", "play('check')", "Check"),
         Binding("l", "play('call')", "Call"),
@@ -29,8 +29,8 @@ class PlayerConsole(App):
         Binding("d", "play('settle')", "Settle"),
         Binding("n", "play('start')", "Next"),
         Binding("q", "quit", "Quit", show=False),
-        Binding("colon", "command_focus", "Command", show=False),
-        Binding("enter", "command_focus", "Command", show=False),
+        Binding("colon", "command_focus", "Command", show=False, priority=True),
+        Binding("enter", "command_focus", "Command", show=False, priority=True),
     ]
 
     def __init__(
@@ -99,8 +99,14 @@ class PlayerConsole(App):
     def action_table_focus(self) -> None:
         self.set_focus(None)
 
+    def check_action(self, action: str, parameters: tuple[object, ...]) -> bool | None:
+        if action == "command_focus":
+            return not isinstance(self.focused, Input)
+        return True
+
     def action_command_focus(self) -> None:
-        self.query_one(Input).focus()
+        # Switch before the next key is dispatched, including pasted/batched input.
+        self.set_focus(self.query_one(Input))
 
     def refresh_table(self) -> None:
         if self.transport is None:

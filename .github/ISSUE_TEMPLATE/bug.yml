@@ -1,0 +1,29 @@
+name: Bug report
+description: Report a reproducible failure with safe diagnostic evidence.
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version and environment
+      description: Package/build version, operating system, and relevant tool versions.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Minimal commands or steps using synthetic data.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted diagnostics
+      description: Never attach real .env files, database URLs, credentials, private keys, or personal data.
+      render: text

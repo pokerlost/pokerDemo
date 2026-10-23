@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pokerdemo"
+version = "0.1.0.dev0"
+description = "Local three-process terminal demo of the installed PokerEngine API"
+readme = "README.md"
+requires-python = ">=3.14,<3.15"
+license = "MIT"
+license-files = ["LICENSES/*", "THIRD_PARTY_NOTICES.md", "LICENSE"]
+dependencies = ["pokerengine==2.0.0.dev2", "Pillow==12.1.1", "typer==0.27.3", "pydantic>=2.12,<3", "pydantic-settings>=2.12,<3"]
+
+[project.scripts]
+pokerDemo = "pokerdemo.cli:app"
+
+[dependency-groups]
+dev = ["mypy>=2.3,<3", "ruff==0.16.4", "packaging>=25,<27", "typer==0.27.3", "pydantic>=2.12,<3", "hatchling>=1.27,<2", "pytest>=9,<10", "pytest-cov>=7,<8"]
+
+[tool.hatch.build]
+exclude = [".aws", ".aws/**", ".agents", ".agents/**", ".codex", ".codex/**", ".serena", ".serena/**", ".vscode", ".vscode/**", ".local", ".local/**", "backups", "backups/**", ".env", ".env.*", "!.env.example", "/core.[0-9]*", "/.coverage", "/.coverage.*"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pokerdemo"]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "N", "RUF", "UP", "TID252"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+files = ["src/pokerdemo"]
+plugins = ["pydantic.mypy"]
+
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --strict-config --import-mode=importlib"
+markers = ["unit: isolated unit tests", "integration: external dependency tests", "contract: public contract tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["pokerdemo"]
+
+[tool.coverage.paths]
+source = ["src/pokerdemo", "*/site-packages/pokerdemo"]
+
+[tool.coverage.report]
+fail_under = 0
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.coverage.json]
+output = "coverage/coverage.json"
+
+[tool.coverage.xml]
+output = "coverage/coverage.xml"
+
+
+[tool.uv]
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+
+[tool.uv.sources]
+pokerengine = { path = ".local/wheels/pokerengine-2.0.0.dev2-cp314-cp314-linux_x86_64.whl" }

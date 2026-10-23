@@ -1,0 +1,23 @@
+name: Feature proposal
+description: Describe a concrete problem and the intended boundary of a change.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Explain who needs the behavior and a concrete example.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and non-goals
+      description: Include compatibility and data ownership where relevant.
+    validations:
+      required: true

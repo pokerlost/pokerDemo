@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "sourceRepository": "https://github.com/pokerlost/pokerengine",
+  "sourceCommit": "1a5cff5029695056669707ccaf3f69e1eff2295b",
+  "sourceLicense": "MIT; Copyright (c) 2026 serrja",
+  "files": [
+    {
+      "source": "examples/server/poker_server.py",
+      "destination": "src/pokerdemo/server.py",
+      "sourceSha256": "83abad9ac4b41bcf2929c77125d3803be95794f535c7aa83a6f4f633ff573e9f"
+    },
+    {
+      "source": "examples/client/poker_client.py",
+      "destination": "src/pokerdemo/client.py",
+      "sourceSha256": "dc7dd6aa74cd4afeb0dff954ce8922c1a2da3e80743ba4f1aa92b9d92b4f2c35"
+    },
+    {
+      "source": "examples/demo.py",
+      "destination": "src/pokerdemo/session.py",
+      "sourceSha256": "933bd77202f0333914b4be5fe91403c91f6a40e0ff83b96c7c763906f9025deb"
+    },
+    {
+      "source": "examples/render_demo.py",
+      "destination": "src/pokerdemo/render.py",
+      "sourceSha256": "c1df7d7d2ad8b390eddf28f4c8ad40ee6dc004d0cdbe7f38a195968d9f766534"
+    },
+    {
+      "source": "tests/python/test_example_protocol.py",
+      "destination": "tests/test_protocol.py",
+      "sourceSha256": "998b0a84e31019426f6a861a8e3c92b875ed9756908283d2991b8b03ef9221ca"
+    },
+    {
+      "source": "docs/demo.md",
+      "destination": "docs/demo.md",
+      "sourceSha256": "6707a53b36d18d4e6273a9a33493d390c6e7ee9b3a31947633ac9c49458cc668"
+    },
+    {
+      "source": "examples/server/README.md",
+      "destination": "docs/protocol.md",
+      "sourceSha256": "064308e85296b4f04b7af75f9f892878b4d6408fba944f587ae06529670e2090"
+    },
+    {
+      "source": "examples/client/README.md",
+      "destination": "docs/client.md",
+      "sourceSha256": "6e405f79f15b2f05882c5e349365ee6e56696570e296f53f126ec8da150eae71"
+    },
+    {
+      "source": "LICENSE",
+      "destination": "LICENSES/pokerengine-MIT.txt",
+      "sourceSha256": "e7813a4e8912aca452d2166e5a1ef6b78fcb6d0855e309cf5a0c35591284c8b2"
+    }
+  ],
+  "media": {
+    "policy": "Historical media are inventoried for private backup and removal from active engine dev after successful transfer. They are not copied into this repository. Published Git history is unchanged.",
+    "files": [
+      {
+        "source": "docs/assets/demo/alice.timing",
+        "sourceSha256": "d475a75bbce3a2e711a920781063b4d157750042e9df1d94dbf3f2dda88333ce"
+      },
+      {
+        "source": "docs/assets/demo/alice.typescript",
+        "sourceSha256": "b45fc9633614d827214ad8e98d02e2123ae30f2f6260fdbd41aa5b0d04bcd2a6"
+      },
+      {
+        "source": "docs/assets/demo/bob.timing",
+        "sourceSha256": "ec733f4ec00b59fcb1d92732f379d2061f93ccf88efde1c2d88870567420b6f4"
+      },
+      {
+        "source": "docs/assets/demo/bob.typescript",
+        "sourceSha256": "727e34fcc850c7d325f418206a5510449e3c61863b8ee3ef3d3702aa567e24fd"
+      },
+      {
+        "source": "docs/assets/demo/server.timing",
+        "sourceSha256": "23699763bbf397433ac7127419b7e8aa54e783e7397461591f751323abaeb60d"
+      },
+      {
+        "source": "docs/assets/demo/server.typescript",
+        "sourceSha256": "4c2a3beb83f1ae578e3bee867e9b333dc44e0379509930ca04ef191648279b94"
+      },
+      {
+        "source": "docs/assets/demo/source.json",
+        "sourceSha256": "6d0f14b0df24478fd3f9245120803aae8feeff9154fcd6c41fcf6c7e163f07cc"
+      },
+      {
+        "source": "docs/assets/demo-dev/alice.typescript",
+        "sourceSha256": "98e8ae50b9596a190e7addfc03cb67bcb4c48c48ac3f8efb99f38bc3e0fc3706"
+      },
+      {
+        "source": "docs/assets/demo-dev/bob.typescript",
+        "sourceSha256": "63d50fe153a1bf038d54c998103f3a7e940114cab5df6a3feecf8716a5af46ae"
+      },
+      {
+        "source": "docs/assets/demo-dev/connected.png",
+        "sourceSha256": "c7581656981ea6db1d7e5792f91a492e83f74b54bc8fb5ca7e6af2c878e6e358"
+      },
+      {
+        "source": "docs/assets/demo-dev/demo.cast",
+        "sourceSha256": "21b469854c69aa3a1c0f5ddd608ffc6a3364ed3d6e8f80a525796cdf4c8d6ab9"
+      },
+      {
+        "source": "docs/assets/demo-dev/demo.gif",
+        "sourceSha256": "417869478bea72cd91f7f034146ab0d1e96c70c3731b4f2074bf2791f5cf63ea"
+      },
+      {
+        "source": "docs/assets/demo-dev/flop.png",
+        "sourceSha256": "45b6e0b7317122eea52b5565a7c4a95f88e9bf1884cb6165f98f80d8056fcc80"
+      },
+      {
+        "source": "docs/assets/demo-dev/result.png",
+        "sourceSha256": "4577760951b05e544ec862a99a0d580a7bbbf94e0fb2dfe051489f41ed0e6db2"
+      },
+      {
+        "source": "docs/assets/demo-dev/source.json",
+        "sourceSha256": "3796691ea9200139532c08de707405943d4df29ccd6ab142a10e72b0036447a4"
+      },
+      {
+        "source": "docs/assets/demo-dev2/all-in-result-alice.txt",
+        "sourceSha256": "78956dccbe7b5f55f7eb1ef05998dc40a875d124044fb52e80cf3064c80ed94f"
+      },
+      {
+        "source": "docs/assets/demo-dev2/all-in-result-bob.txt",
+        "sourceSha256": "041587bcb3bab4124875edfcdc88f47c50db9e7421ae145bfa6ae948e6f18726"
+      },
+      {
+        "source": "docs/assets/demo-dev2/all-in-result-server.txt",
+        "sourceSha256": "3cbedafb87fbc4ddcd6ac5b7d6e33880c45669c3eccca68c26b8e20c9e95ed73"
+      },
+      {
+        "source": "docs/assets/demo-dev2/all-in-result.png",
+        "sourceSha256": "5a5c8692e7cafc9c5671f929e2d50476a83823b21d69cd413db30f6dbfe8cd75"
+      },
+      {
+        "source": "docs/assets/demo-dev2/all-in-showdown-alice.txt",
+        "sourceSha256": "f6e764a80bbcf0a9c865ac9a002bca3a6e1e59fa7afc1238cc2d84e3915fcdb5"
+      },
+      {
+        "source": "docs/assets/demo-dev2/all-in-showdown-bob.txt",
+        "sourceSha256": "ba387e3243df575eeb66800e6d9fc25460a1fee3bd545e484bf4cffe4966d5e2"
+      },
+      {
+        "source": "docs/assets/demo-dev2/all-in-showdown-server.txt",
+        "sourceSha256": "b73ed5ae4cb6769ac6a2192c0f1c3713c8dadea70187b4e0ca9eec7060815fde"
+      },
+      {
+        "source": "docs/assets/demo-dev2/all-in-showdown.png",
+        "sourceSha256": "bb70f70edfbf71ca27c620c2291dc14e6946bdbd3f819952930598ef545cd1da"
+      },
+      {
+        "source": "docs/assets/demo-dev2/build-source.json",
+        "sourceSha256": "1c6ee5483899219d1a89dde0aa98132376da39cb20ec4a81c54b1b2ef3ed887f"
+      },
+      {
+        "source": "docs/assets/demo-dev2/connected-alice.txt",
+        "sourceSha256": "a76e40d860f85b79d6ba7765c693851902c003254657baf57a466ad278886a44"
+      },
+      {
+        "source": "docs/assets/demo-dev2/connected-bob.txt",
+        "sourceSha256": "ab2940c1b83bbe0b513b8f8d030f52c6979f034c22e1e01c9b444f0903666a50"
+      },
+      {
+        "source": "docs/assets/demo-dev2/connected-server.txt",
+        "sourceSha256": "4dc372c2a6e71a07550e16d1b410557266f534da58c24e9a7df82f241e5e2ba2"
+      },
+      {
+        "source": "docs/assets/demo-dev2/connected.png",
+        "sourceSha256": "2734910e95adc0d80e73a3913d3dd4f45293879beea47dd7f8f91b0036b16a5b"
+      },
+      {
+        "source": "docs/assets/demo-dev2/demo.cast",
+        "sourceSha256": "c45666fdeb49df8ac0cbd34eabd233314cde0e31aca2c29e2d53bb0e185e6f0a"
+      },
+      {
+        "source": "docs/assets/demo-dev2/demo.gif",
+        "sourceSha256": "9aaebbbe5f549662016b85ee6b2a429f67004687d6d6cb9663e4fef12f5f9219"
+      },
+      {
+        "source": "docs/assets/demo-dev2/disconnected-alice.txt",
+        "sourceSha256": "4982d5042f67be908865d909946c8acd656b451fa3b5e01f47e3fbe3f0e30304"
+      },
+      {
+        "source": "docs/assets/demo-dev2/disconnected-server.txt",
+        "sourceSha256": "effb049d4ac10dfb70f4abee81dcd34a648d01fba2c7b5dae5a02a3a5f1b95f0"
+      },
+      {
+        "source": "docs/assets/demo-dev2/disconnected.png",
+        "sourceSha256": "8ccf7a16a0bc64f868d31961c7f0d090308e156cf17abddfe92bc68b0a083d85"
+      },
+      {
+        "source": "docs/assets/demo-dev2/flop-alice.txt",
+        "sourceSha256": "11e045efd33f654862855af9b76a0ea440c4067d22b57bd1007aea66756020ab"
+      },
+      {
+        "source": "docs/assets/demo-dev2/flop-bob.txt",
+        "sourceSha256": "27d66792d3bbb4dff3c028b6abf7705375373ef17bf5ba1dc9f2e72eca834088"
+      },
+      {
+        "source": "docs/assets/demo-dev2/flop-server.txt",
+        "sourceSha256": "61936d0b3b81da4200d55bb6ca61f40e44205e765bbe44f3cd682660956b8b88"
+      },
+      {
+        "source": "docs/assets/demo-dev2/flop.png",
+        "sourceSha256": "6e48dbbf829a20467c4e8ef3e5d02c73110fe46bdc3b00d0170a2d5581521fd7"
+      },
+      {
+        "source": "docs/assets/demo-dev2/fold-result-alice.txt",
+        "sourceSha256": "f8ee4d52f2550d426d16d0b365eff410c1bdadf9626a53492bb08ad63eb28640"
+      },
+      {
+        "source": "docs/assets/demo-dev2/fold-result-bob.txt",
+        "sourceSha256": "ba0f89b17318a9757eee162c708235f538a2c07f1dc4703beb131f5b64d7ad9c"
+      },
+      {
+        "source": "docs/assets/demo-dev2/fold-result-server.txt",
+        "sourceSha256": "222b47d9ddd79de2e8d3d3b8b9c3ed580a3f5428e5e5fafa9bc316ae67fa3cf8"
+      },
+      {
+        "source": "docs/assets/demo-dev2/fold-result.png",
+        "sourceSha256": "cba40d574a29e5a95e9ff5444114a7a3ee380369bffb1b49b7cd8b0868243dbc"
+      },
+      {
+        "source": "docs/assets/demo-dev2/render.json",
+        "sourceSha256": "4586c2c5317c17bdbf668e458bc043b3f211ea0a474b81b6c7bb607681a43b12"
+      },
+      {
+        "source": "docs/assets/demo-dev2/result-alice.txt",
+        "sourceSha256": "3df1cfdc26f4622c8f45979ffc515311849d99024e00956154e27ab86e2cede9"
+      },
+      {
+        "source": "docs/assets/demo-dev2/result-bob.txt",
+        "sourceSha256": "1b48a8c87f1dd1a2676d30f04384db04e329d961d52527d7cff9bc94216af326"
+      },
+      {
+        "source": "docs/assets/demo-dev2/result-server.txt",
+        "sourceSha256": "cef7807a6fa595cd0ee0ecef074a21d10d12d39d8cbfb7269836adb0ca4a7a5e"
+      },
+      {
+        "source": "docs/assets/demo-dev2/result.png",
+        "sourceSha256": "4f7b236df4181e8d372f4f248c8660915a33d3640451d2b049038ff328858f3e"
+      },
+      {
+        "source": "docs/assets/demo-dev2/river-alice.txt",
+        "sourceSha256": "acc7a8a02b57b70b46db0ddf4c71000bad1dc6940e17b9aa79e0bba38106542a"
+      },
+      {
+        "source": "docs/assets/demo-dev2/river-bob.txt",
+        "sourceSha256": "3e8be186825f5f94096df77540cf8ecf7e865cbd480dd071fba67e3873221dc3"
+      },
+      {
+        "source": "docs/assets/demo-dev2/river-server.txt",
+        "sourceSha256": "29fe8d3850c612032b68c5c42c6741ecde3750c1730b1d12f852b2ed589bc2ab"
+      },
+      {
+        "source": "docs/assets/demo-dev2/river.png",
+        "sourceSha256": "e90025fb9ae4d77a8c30b85096b84f232fc8bce9e7c51ce171152df074e648c6"
+      },
+      {
+        "source": "docs/assets/demo-dev2/showdown-alice.txt",
+        "sourceSha256": "aba6066171b0a473e9963b2ae30237fb500d078fde6fe2159019d18ebd51ce04"
+      },
+      {
+        "source": "docs/assets/demo-dev2/showdown-bob.txt",
+        "sourceSha256": "8f6825d5b16f00267a66450c85b81984a623ae004365ecd006f8e57f9aa45076"
+      },
+      {
+        "source": "docs/assets/demo-dev2/showdown-server.txt",
+        "sourceSha256": "6a29ecfdbe86408d5864f31654c730a5b5598f675d0c739e3426e2da32866579"
+      },
+      {
+        "source": "docs/assets/demo-dev2/showdown.png",
+        "sourceSha256": "7c3ed7800db4f4fd5dfe88e63d48d92cfaeca2e4e74fc737c62c782b9f038c44"
+      },
+      {
+        "source": "docs/assets/demo-dev2/source.json",
+        "sourceSha256": "a006afd7ac697c4db1b6d2e9ffec1cd2f590d77252341a20d95db38f650b5935"
+      },
+      {
+        "source": "docs/assets/demo-dev2/tmux.typescript",
+        "sourceSha256": "1415718567a2002a7f20bd26b09cb947d2cc918dfd844d2447c5657c7ec16534"
+      },
+      {
+        "source": "docs/assets/demo-dev2/turn-alice.txt",
+        "sourceSha256": "021febcd7c796b4c079f9752cd8c873cfccabd823644989a183ea0cb2f2727e4"
+      },
+      {
+        "source": "docs/assets/demo-dev2/turn-bob.txt",
+        "sourceSha256": "c129b994efcf5dd810705397e598b579ff876ed36e9fd2df735e24403d2a9848"
+      },
+      {
+        "source": "docs/assets/demo-dev2/turn-server.txt",
+        "sourceSha256": "91cd70b7a55dab46d9ab19c265cd2c32c50c9b3ae063107297d031bbba738d42"
+      },
+      {
+        "source": "docs/assets/demo-dev2/turn.png",
+        "sourceSha256": "9a4a5cbd1c2d2d6ea0adbc02b838f66ed559d81bf9cd59e559a708d52f08a775"
+      }
+    ]
+  },
+  "retainedEngineTests": [
+    "test_smoke_runs_as_real_installed_package_subprocess remains with engine/scripts/smoke.py",
+    "All native C++ and public Python API contracts remain in pokerengine."
+  ],
+  "template": {
+    "repository": "https://github.com/serrja/typerTemplate",
+    "commit": "1080470759f689f0ded8eff3bc52c4c7ece8e7c1",
+    "copierVersion": "9.17.2",
+    "withCi": false,
+    "localAdaptation": "CLI/settings and packaging specialized; unused generated Docker quality/release scaffold omitted. No generator fork."
+  },
+  "engineArtifact": {
+    "version": "2.0.0.dev2",
+    "buildSourceCommit": "b66af7c4a61715a16a2015c8e437cdd5207cc448",
+    "sha256": "13a1a57f6c61860cf1c1b89d1a4db624eda8d8cad132bdf7d61f0e94ab798ee3",
+    "tag": "cp314-cp314-linux_x86_64",
+    "distribution": "Owner-supplied local wheel, excluded from repository and packages"
+  },
+  "adaptations": [
+    "Imports use installed pokerdemo and public pokerengine packages.",
+    "Typer/Pydantic CLI, tool discovery and dedicated workspace lifecycle replace engine-relative launch paths.",
+    "Recordings remain under ignored .local/recordings; four real replay frames are selected.",
+    "Protocol tests transferred; engine-native and public Python API contracts remain with engine."
+  ]
+}

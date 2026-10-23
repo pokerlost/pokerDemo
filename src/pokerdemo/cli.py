@@ -107,6 +107,13 @@ def record(
     tmux: str | None = None,
     agg: str | None = None,
     delay: float | None = None,
+    show_cards: Annotated[
+        bool | None,
+        typer.Option(
+            "--show-cards/--hide-cards",
+            help="Show each synthetic player's own cards in the local recording (default: show).",
+        ),
+    ] = None,
     open_result: Annotated[bool, typer.Option("--open")] = False,
 ) -> None:
     """One command: actual PTY capture, official agg replay, unchanged PNG frames."""
@@ -122,6 +129,7 @@ def record(
         tmux=tmux,
         agg=agg,
         delay=delay,
+        record_show_cards=show_cards,
     )
     renderer = resolve_tool("agg", settings.agg)
     # Fail before starting a game if the separately installed image dependency is missing.
@@ -136,6 +144,11 @@ def record(
         datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
     )
     typer.echo(f"Local recording: {destination}")
+    typer.echo(
+        "Cards: each client shows its own synthetic hand; the server stays public."
+        if settings.record_show_cards
+        else "Cards: hidden in both clients; all recorded views are public."
+    )
     typer.echo("[1/3] Playing an unattended game (~60 seconds); the game is not opened on screen.")
     record_session(settings, destination)
     frames = render(destination, renderer, settings.font_family)

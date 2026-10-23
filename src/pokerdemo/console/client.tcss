@@ -1,0 +1,44 @@
+Screen { background: #091f24; color: #e7f1ec; }
+#identity { height: 2; padding: 0 2; background: #123b3e; content-align: left middle; }
+#summary { height: 2; padding: 0 2; margin-top: 1; }
+CardsView { height: 9; padding: 0 1; margin: 0 1; border: round #276354; background: #0c2c2b; }
+PlayerTableView { height: auto; max-height: 5; padding: 0 1; margin: 1 0; }
+#turn { height: 2; padding: 0 2; content-align: left middle; background: #123b3e; color: #a4bfba; }
+#turn.your-turn { color: #7bf0ba; text-style: bold; background: #174c3b; }
+#actions { height: 3; margin: 1 1 0 1; }
+#actions Button { width: 1fr; min-width: 8; height: 3; padding: 0; margin-right: 1; background: #16483e; color: #d8f6e7; border: none; }
+#actions Button:last-child { margin-right: 0; }
+#actions Button:focus { background: #26745b; text-style: bold; border: solid #7bf0ba; }
+#actions Button:hover { background: #26745b; }
+#actions Button:disabled { background: #142c30; color: #647b79; }
+#actions #start, #actions #settle { background: #26745b; }
+#actions #all-in { background: #594123; color: #ffe3aa; }
+#actions #all-in:disabled { background: #142c30; color: #647b79; }
+#feedback { height: 2; padding: 0 2; color: #8fa9a2; content-align: left middle; }
+#feedback.error { color: #ffb4ac; }
+#feedback.success { color: #7bf0ba; }
+#command { display: none; height: 3; margin: 0 1; border: solid #65c7a5; background: #103333; }
+#command:focus { border: solid #7bf0ba; }
+#activity { height: 1fr; min-height: 1; padding: 0 2; color: #79958d; }
+Footer { height: 1; background: #123b3e; color: #b6d2c8; }
+Screen.compact #identity { height: 1; padding: 0 1; }
+Screen.compact #summary { margin-top: 0; padding: 0 1; }
+Screen.compact CardsView { height: 7; border: none; margin: 0; padding: 0 1; }
+Screen.compact PlayerTableView { height: 3; margin: 0; }
+Screen.compact #turn { height: 1; padding: 0 1; }
+Screen.compact #actions { margin: 0 1; }
+Screen.compact #feedback { height: 1; padding: 0 1; }
+Screen.compact #activity { display: none; }
+Screen.compact #command { height: 1; border: none; margin: 0 1; }
+Screen.command-open PlayerTableView { display: none; }
+WagerDialog { align: center middle; background: #020e13 70%; }
+#wager-dialog { width: 56; max-width: 95%; height: auto; padding: 1 2; border: round #65c7a5; background: #103333; }
+#wager-title { height: 1; color: #7bf0ba; text-style: bold; }
+#wager-range { height: 3; padding-top: 1; color: #a9c2ba; }
+#amount { height: 3; border: solid #65c7a5; background: #091f24; }
+#amount:focus { border: solid #7bf0ba; }
+#presets, #wager-confirmation { height: 3; }
+#presets Button, #wager-confirmation Button { width: 1fr; min-width: 8; height: 3; margin-right: 1; padding: 0; border: none; background: #1b4b43; color: #d8f6e7; }
+#presets Button:focus, #wager-confirmation Button:focus { border: solid #7bf0ba; }
+#confirm { background: #26745b; }
+#amount-message { height: 2; color: #f6cf94; }

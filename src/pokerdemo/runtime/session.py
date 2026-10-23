@@ -18,6 +18,12 @@ from pokerdemo.runtime.tools import resolve_tool
 from pokerdemo.settings import Settings
 
 SESSION = "pokerdemo"
+RECORDING_TERMINAL = {
+    "TERM": "xterm-256color",
+    "COLORTERM": "truecolor",
+    "TEXTUAL_COLOR_SYSTEM": "truecolor",
+    "ESCDELAY": "100",
+}
 
 
 class DemoSession:
@@ -64,6 +70,18 @@ class DemoSession:
             text=True,
         )
 
+    def application_command(self, arguments: list[str]) -> str:
+        """Declare colors only for owned recording apps, regardless of host NO_COLOR."""
+        if self.recording:
+            arguments = [
+                "env",
+                "-u",
+                "NO_COLOR",
+                *(f"{name}={value}" for name, value in RECORDING_TERMINAL.items()),
+                *arguments,
+            ]
+        return "exec " + shlex.join(arguments)
+
     def start(self, *, public_capture: bool, width: int = 160, height: int = 50) -> dict[str, Any]:
         if self.command("has-session", "-t", SESSION, check=False).returncode == 0:
             raise typer.BadParameter(
@@ -106,10 +124,11 @@ class DemoSession:
             str(height),
             "-c",
             str(self.root),
-            "exec " + shlex.join(server),
+            self.application_command(server),
         ).stdout.strip()
         try:
             self.command("set-option", "-g", "status", "off")
+            self.command("set-option", "-g", "mouse", "on")
             self.command("set-option", "-g", "pane-border-status", "top")
             self.command("set-option", "-g", "pane-border-format", " #{pane_title} ")
             self.command("select-pane", "-t", first, "-T", "PUBLIC SERVER")
@@ -133,7 +152,8 @@ class DemoSession:
                 ]
                 if not public_capture:
                     client.append("--private")
-                options = ["-v", "-l", "60%"] if seat == 0 else ["-h", "-l", "50%"]
+                split_size = "70%" if self.recording else "60%"
+                options = ["-v", "-l", split_size] if seat == 0 else ["-h", "-l", "50%"]
                 target = first if seat == 0 else panes["alice"]
                 panes[name] = self.command(
                     "split-window",
@@ -146,7 +166,7 @@ class DemoSession:
                     *options,
                     "-c",
                     str(self.root),
-                    "exec " + shlex.join(client),
+                    self.application_command(client),
                 ).stdout.strip()
                 self.command("select-pane", "-t", panes[name], "-T", name.upper())
             self.command("select-pane", "-t", panes["alice"])

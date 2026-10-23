@@ -16,7 +16,7 @@ poker rules and state transitions.
 | `console/` | Textual server/player apps and shared Rich tables |
 | `runtime/session.py` | Three processes in a workspace-owned tmux session |
 | `runtime/recording.py` | Scripted inputs, real PTY capture and provenance receipt |
-| `runtime/render.py` | agg replay, GIF and four exact replay frames |
+| `runtime/render.py` | agg replay, GIF and five exact replay frames |
 | `runtime/tools.py` | Explicit executable discovery and verified local fallback tools |
 
 There is no engine source copy, private adapter import or path injection. Native
@@ -40,9 +40,11 @@ See [the protocol](protocol.md) for wire limits and disconnect behavior.
 
 ## Privacy boundary
 
-The public dashboard and recordings use `public_view()`. A private subscription
-requires explicit server enablement and a joined connection; its snapshot comes
-from `player_view(bound_player_id)`. Each recipient gets a separate projection.
+The public dashboard and recording observer use `public_view()`. A private
+subscription requires explicit server enablement and a joined connection; its
+snapshot comes from `player_view(bound_player_id)`. Each recipient gets a separate
+projection. Synthetic recording clients show their own hands by default, so the
+combined local GIF contains both hands; `record --hide-cards` uses public clients.
 Trusted `server_view()` and opponent hole cards are never wire operations.
 
 Results expose payout recipients, amounts and rake. Activity contains bounded public
@@ -59,10 +61,13 @@ symlinks before runtime operations.
 
 The recorder drives the same player consoles through tmux. It preserves real PTY
 bytes and timing in asciicast v2, then agg replays that stream. The GIF uses a 1 fps
-cap; four PNGs come from exact stable timestamps in the same cast. These are terminal
+cap; five PNGs come from exact stable timestamps in the same cast. These are terminal
 replay frames, not desktop screenshots or reconstructed game images.
 
-The local receipt records source SHA, installed package/wheel checks, tools,
+The schema 2 receipt declares public server/observer views and either public or
+own-player synthetic clients. Rendering rejects unsupported private-view policies;
+legacy schema 1 remains valid only for public captures. The receipt records source
+SHA, installed package/wheel checks, tools,
 timestamps, scenario observations and file hashes. Capture and rendering have
 separate completion flags. Failure and completion clean up the recording session.
 All output stays beneath `.local/recordings/<run-id>/`.

@@ -21,8 +21,27 @@ def render(capture: Path, agg: Tool, font_family: str) -> list[Path]:
 
     receipt_path = capture / "recording.json"
     receipt = json.loads(receipt_path.read_text())
-    if not receipt.get("completed") or receipt.get("privateViews") is not False:
-        raise ValueError("Expected a completed public-only recording")
+    if receipt.get("completed") is not True:
+        raise ValueError("Expected a completed recording")
+    private_views = receipt.get("privateViews")
+    if type(private_views) is not bool:
+        raise ValueError("Recording must explicitly identify its card visibility")
+    schema = receipt.get("schema")
+    if type(schema) is not int:
+        raise ValueError("Recording schema must be an integer")
+    if schema == 2:
+        expected_views = {
+            "server": "public",
+            "observer": "public",
+            "players": "own-player" if private_views else "public",
+        }
+        if receipt.get("views") != expected_views or receipt.get("syntheticPlayers") != [
+            "alice",
+            "bob",
+        ]:
+            raise ValueError("Unsupported recording views; only synthetic own-player cards allowed")
+    elif schema != 1 or private_views:
+        raise ValueError("Unsupported recording schema or private view policy")
     receipt["renderCompleted"] = False
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
     before = agg.describe()
@@ -51,15 +70,17 @@ def render(capture: Path, agg: Tool, font_family: str) -> list[Path]:
         "late-street": receipt["markers"]["river"],
         "result": receipt["markers"]["result"],
     }
+    if "wager-menu" in receipt["markers"]:
+        selected["wager-menu"] = receipt["markers"]["wager-menu"]
     folder = capture / "frames"
     folder.mkdir(mode=0o700, exist_ok=False)
     frames: list[Path] = []
     # Select exact moments from the same original PTY; GIF duration rounding is not a clock.
     # The temporary single-frame replays also stay inside this private run directory.
     with tempfile.TemporaryDirectory(prefix=".frame-replay-", dir=capture) as temporary:
-        typer.echo("[3/3] Extracting four frames from the same recording…")
+        typer.echo(f"[3/3] Extracting {len(selected)} frames from the same recording…")
         for index, (name, timestamp) in enumerate(selected.items(), 1):
-            typer.echo(f"  Frame {index}/4: {name}")
+            typer.echo(f"  Frame {index}/{len(selected)}: {name}")
             replay = Path(temporary) / f"{name}.gif"
             subprocess.run(
                 [*command, "--select", str(timestamp), str(capture / "session.cast"), str(replay)],

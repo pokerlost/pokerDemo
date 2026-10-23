@@ -24,7 +24,7 @@ import typer
 
 from pokerdemo.network.client import PokerProtocol, WebSocketTransport
 from pokerdemo.protocol.models import TableState
-from pokerdemo.runtime.session import SESSION, DemoSession
+from pokerdemo.runtime.session import RECORDING_TERMINAL, SESSION, DemoSession
 from pokerdemo.runtime.tools import resolve_wheel
 from pokerdemo.settings import ENGINE_VERSION, Settings
 
@@ -130,13 +130,15 @@ class Recording:
         session.validate_paths()
         self.master, slave = pty.openpty()
         fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", height, width, 0, 0))
-        # This is the declared terminal type of a fresh recording PTY, not a host font fix.
+        # Match the owned recording apps; never change the user's terminal environment.
+        environment = {**os.environ, **RECORDING_TERMINAL}
+        environment.pop("NO_COLOR", None)
         self.process = subprocess.Popen(
             [session.tmux, "-S", str(session.socket), "attach-session", "-t", SESSION],
             stdin=slave,
             stdout=slave,
             stderr=slave,
-            env={**os.environ, "TERM": "xterm-256color"},
+            env=environment,
             start_new_session=True,
         )
         os.close(slave)
@@ -151,7 +153,7 @@ class Recording:
                     "width": width,
                     "height": height,
                     "title": "PokerDemo: actual three-process tmux session",
-                    "env": {"TERM": "xterm-256color"},
+                    "env": RECORDING_TERMINAL,
                 }
             )
             + "\n"
@@ -198,7 +200,7 @@ class Recording:
 
 
 def record(settings: Settings, output: Path) -> None:
-    """Record a separate public-only, scripted run of the same real Textual apps."""
+    """Record the same real apps with public or own-player synthetic client views."""
     workspace = settings.workspace.expanduser().absolute()
     wheel = resolve_wheel(settings)
     started_at = datetime.now(UTC).isoformat()
@@ -225,7 +227,7 @@ def record(settings: Settings, output: Path) -> None:
             raise ValueError("Recording destination inside the repository must be ignored")
     output.mkdir(parents=True, exist_ok=False, mode=0o700)
     output.chmod(0o700)
-    manifest = session.start(public_capture=True)
+    manifest = session.start(public_capture=not settings.record_show_cards)
     capture: Recording | None = None
     transport: WebSocketTransport | None = None
     observations: list[dict[str, Any]] = []
@@ -236,27 +238,37 @@ def record(settings: Settings, output: Path) -> None:
         transport = WebSocketTransport("127.0.0.1", manifest["port"])
         protocol = PokerProtocol(transport)
 
+        def public_state() -> TableState:
+            state = protocol.state()
+            if any(player.cards is not None for player in state.players):
+                raise RuntimeError("Recording observer received private cards")
+            return state
+
         def wait_for(predicate: Any, timeout: float = 12) -> TableState:
             deadline = time.monotonic() + timeout
             while time.monotonic() < deadline:
                 capture.drain(0.1)
-                state = protocol.state()
+                state = public_state()
                 if predicate(state):
                     return state
             raise RuntimeError("The real demo did not reach its expected state")
 
-        def mark(name: str) -> None:
+        def mark(name: str, *, pause: float | None = None) -> None:
             typer.echo(f"  Game: {name}")
-            capture.drain(delay)
+            duration = delay if pause is None else pause
+            capture.drain(duration)
+            public_state()
             # Select a stable moment inside the display pause, before the next redraw.
-            markers[name] = round(time.monotonic() - capture.started - delay / 2, 4)
+            markers[name] = round(time.monotonic() - capture.started - duration / 2, 4)
             for role, pane in manifest["panes"].items():
                 pane_capture = session.command("capture-pane", "-p", "-t", pane, check=False)
                 if pane_capture.returncode == 0:
                     (output / f"{name}-{role}.txt").write_text(pane_capture.stdout)
 
-        def submit(player: str, command: str, *, rejected: bool = False) -> TableState:
-            before = protocol.state()
+        def submit(
+            player: str, command: str, *, rejected: bool = False, wager_menu: bool = False
+        ) -> TableState:
+            before = public_state()
             cursor, _ = protocol.events(0)
             rejection_marker = f"REJECTED [{command}]"
             if rejected:
@@ -267,7 +279,31 @@ def record(settings: Settings, output: Path) -> None:
                     raise RuntimeError(
                         "Recording rejection commands must have unique visible markers"
                     )
-            session.send(manifest["panes"][player], command)
+            if wager_menu:
+                name, total = command.split()
+                if name not in {"bet", "raise"} or rejected:
+                    raise ValueError("Only a valid native wager can use the recording menu")
+                pane_id = manifest["panes"][player]
+                session.command("send-keys", "-t", pane_id, "Escape")
+                # Textual's real terminal parser must resolve Escape before a letter
+                # arrives, otherwise the bytes can become an Alt+letter sequence.
+                capture.drain(0.25)
+                session.command("send-keys", "-t", pane_id, "r" if name == "raise" else "b")
+                menu_deadline = time.monotonic() + 12
+                while time.monotonic() < menu_deadline:
+                    capture.drain(0.1)
+                    pane = session.command("capture-pane", "-p", "-t", pane_id).stdout
+                    if name.upper() + " TO" in pane:
+                        break
+                else:
+                    raise RuntimeError("The client did not open its wager menu")
+                mark("wager-menu", pause=max(delay, 2.5))
+                if public_state().version != before.version or protocol.events(0)[0] != cursor:
+                    raise RuntimeError("Opening a wager menu changed the native game")
+                # The same UI initializes the amount to its current native legal minimum.
+                session.command("send-keys", "-t", pane_id, "Enter")
+            else:
+                session.send(manifest["panes"][player], command)
             if rejected:
                 rejection_deadline = time.monotonic() + 12
                 while time.monotonic() < rejection_deadline:
@@ -280,12 +316,16 @@ def record(settings: Settings, output: Path) -> None:
                 else:
                     raise RuntimeError(f"The client did not display this rejection: {command}")
                 capture.drain(delay)
-                state = protocol.state()
+                state = public_state()
                 after_cursor, _ = protocol.events(0)
                 if state.version != before.version or cursor != after_cursor:
                     raise RuntimeError("Rejected input changed native state or event cursor")
             else:
                 state = wait_for(lambda value: value.version != before.version)
+                if wager_menu:
+                    actor = next(p for p in state.players if p.player_id == player)
+                    if actor.street_committed != int(total):
+                        raise RuntimeError("The wager menu did not submit its native minimum")
                 capture.drain(delay)
             observations.append(
                 {
@@ -293,6 +333,7 @@ def record(settings: Settings, output: Path) -> None:
                     "street": before.street,
                     "player": player,
                     "command": command,
+                    "input": "wager-menu" if wager_menu else "command",
                     "rejected": rejected,
                     "rejectionMarker": rejection_marker if rejected else None,
                     "beforeVersion": before.version,
@@ -305,19 +346,22 @@ def record(settings: Settings, output: Path) -> None:
             return state
 
         def action(command: str) -> TableState:
-            current = protocol.state().current_player
+            current = public_state().current_player
             if current is None:
                 raise RuntimeError("The native engine has no current player")
             return submit(current, command)
 
-        def minimum_action(name: str) -> TableState:
+        def minimum_action(name: str, *, wager_menu: bool = False) -> TableState:
             legal = protocol.legal()
             bounds = (
                 legal.raise_to if name == "raise" and legal else legal.bet_to if legal else None
             )
             if bounds is None:
                 raise RuntimeError(f"The native engine did not offer {name}")
-            return action(f"{name} {bounds.minimum}")
+            current = public_state().current_player
+            if current is None:
+                raise RuntimeError("The native engine has no current player")
+            return submit(current, f"{name} {bounds.minimum}", wager_menu=wager_menu)
 
         wait_for(
             lambda state: (
@@ -326,14 +370,14 @@ def record(settings: Settings, output: Path) -> None:
         )
         mark("connected")
         submit("alice", "start")
-        current = protocol.state().current_player
+        current = public_state().current_player
         if current is None:
             raise RuntimeError("Missing opening player")
         submit(current, "bet invalid", rejected=True)
         submit(current, "raise 1", rejected=True)
         other = "bob" if current == "alice" else "alice"
         submit(other, "call", rejected=True)
-        minimum_action("raise")
+        minimum_action("raise", wager_menu=True)
         action("call")
         mark("flop")
         minimum_action("bet")
@@ -360,7 +404,7 @@ def record(settings: Settings, output: Path) -> None:
         # Unequal stacks can leave a native current player on later streets.
         # Submit only the engine's offered passive action; do not assume runout.
         for _ in range(16):
-            state = protocol.state()
+            state = public_state()
             if state.phase == "showdown":
                 break
             legal = protocol.legal()
@@ -407,7 +451,7 @@ def record(settings: Settings, output: Path) -> None:
             verification_error = str(error)
         completed = completed and unchanged
         receipt = {
-            "schema": 1,
+            "schema": 2,
             "startedAtUtc": started_at,
             "captureFinishedAtUtc": datetime.now(UTC).isoformat(),
             "pipelineCompleted": False,
@@ -420,7 +464,14 @@ def record(settings: Settings, output: Path) -> None:
             "sourceAndArtifactUnchanged": unchanged,
             "verificationError": verification_error,
             "capture": "actual tmux client PTY; WebSocket server + two Textual clients",
-            "privateViews": False,
+            "privateViews": settings.record_show_cards,
+            "views": {
+                "server": "public",
+                "observer": "public",
+                "players": "own-player" if settings.record_show_cards else "public",
+            },
+            "syntheticPlayers": ["alice", "bob"],
+            "terminal": RECORDING_TERMINAL,
             "manualModeHasOwnPlayerView": True,
             "loopbackOnly": True,
             "completed": completed,

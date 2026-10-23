@@ -10,7 +10,9 @@ wheel; preparation checks the pinned SHA256. No neighboring checkout, editable e
 private adapter import, sys.path override or implicit tool installation is supported.
 
 Manual mode preserves each player's own permitted view. Recording is a separate
-synthetic seeded scenario with public-only clients. All generated media, logs,
+synthetic seeded scenario showing each client's own permitted hand by default;
+`record --hide-cards` selects public-only clients. The server monitor and recorder
+observer always remain public. All generated media, logs,
 wheel artifacts and runtime state stay under ignored `.local/`; recordings belong
 under `.local/recordings/<run-id>/` and are excluded from distribution packaging.
 

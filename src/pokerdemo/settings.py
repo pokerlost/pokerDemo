@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     agg: str | None = None
     delay: float = Field(default=1.5, ge=0.4, le=10, allow_inf_nan=False)
     font_family: str = "JetBrainsMono Nerd Font Mono"
+    record_show_cards: bool = True
 
 
 def load_settings(config: Path | None = None, **overrides: Any) -> Settings:

@@ -50,9 +50,11 @@ def test_player_hotkeys_command_input_and_private_live_view() -> None:
                     )
                     assert (game.game.state_version, game.game.event_cursor) == before
                     assert app.focused is None
+                    await pilot.press("colon")
                     command = app.query_one(Input)
                     assert command.content_region.height >= 1
                     assert command.region.bottom <= app.query_one(Footer).region.y
+                    await pilot.press("escape")
                     app.query_one("#feedback", Static).update("")
                     # One PTY read may contain the focus key and the whole command.
                     # Those letters must never fire table hotkeys before focus settles.

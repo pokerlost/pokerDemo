@@ -42,10 +42,10 @@ make demo
 
 Use a terminal around 160 columns by 50 rows. The public server dashboard is above
 Alice and Bob. The launcher selects a free loopback port and focuses Alice.
-**Press `S` in a player panel to start the hand.**
+**Click Deal hand (or press `S`) in a player panel to start.**
 
-Switch panels with `Ctrl+B`, then an arrow. `Ctrl+B`, then `D` detaches and leaves
-the manual game running. Return or stop it from another terminal:
+Click a player panel to control it, or switch with `Ctrl+B`, then an arrow.
+`Ctrl+B`, then `D` detaches and leaves the manual game running. Return or stop it from another terminal:
 
 ```bash
 make demo-attach
@@ -70,25 +70,35 @@ headless WebSocket listener instead. Defaults use `127.0.0.1:8765/ws`.
 
 ## Play
 
-Each manual player sees only their own permitted private cards. The server dashboard
-always shows public state. The native engine provides legal actions and ranges.
+Each client shows your two cards, the five community-card positions, the pot,
+player stacks and the current turn. Red suits are hearts and diamonds; dark suits
+are spades and clubs. Each player receives only their own permitted hole cards.
+The public server console never displays hole cards.
 
-| Action | Keys or input |
+Choose an action with the mouse, or use **Tab** to select a button and **Enter** to
+activate it. Unavailable actions are disabled. **Bet** and **Raise** open an amount
+picker with **Min**, **½ pot** and **Pot** presets. The amount is the total for the
+current street, including chips already committed. The server supplies the legal
+range; the dialog checks your amount before confirmation. **Esc** cancels it.
+**All-in** uses the maximum permitted bet or raise; when only a short-stack call is
+available, use **Call**.
+
+| Key | Action |
 | --- | --- |
-| Start / next hand | `S` / `N` |
-| Call / check / fold | `L` / `C` / `F` |
-| All-in | `A` |
-| Bet / raise | `:`, type `bet TOTAL` or `raise TOTAL`, then Enter |
-| Settle showdown | `D` |
-| Enter a command | `:` or Enter |
-| Return to hotkeys | Escape |
-| Exit one console | `Ctrl+Q`, or type `quit` |
+| `S` / `N` | Deal the first / next hand |
+| `C` | Check |
+| `L` | Call the displayed amount |
+| `F` | Fold |
+| `B` / `R` | Choose a bet / raise amount |
+| `A` | Bet / raise to the permitted maximum |
+| `D` | Settle showdown and show the result |
+| `:` | Open the command field |
+| `Esc` | Close the command field or cancel the amount picker |
+| `Ctrl+Q` | Exit the selected console |
 
-Hotkeys apply when input is not focused. Escape is useful if a letter appears in the
-input box instead of triggering an action. Commands include `start`, `check`, `call`,
-`fold`, `all_in`, `bet TOTAL`, `raise TOTAL`, `settle`, `state`, `legal` and `result`.
-Bet and raise totals mean the final street commitment. At showdown, settle before
-starting the next hand. The UI reports invalid input or native rejections.
+The optional command field accepts `start`, `check`, `call`, `fold`, `bet TOTAL`,
+`raise TOTAL`, `all_in` and `settle`. Press **Enter** to submit. To stop the entire
+manual demo, run `make demo-stop` from another terminal.
 
 If the current player disconnects or times out, the server checks when the native
 legal actions permit it, otherwise folds. Reading updates does not renew the action
@@ -125,7 +135,8 @@ Each run creates:
 │   ├── 01-connected.png
 │   ├── 02-action.png
 │   ├── 03-late-street.png
-│   └── 04-result.png
+│   ├── 04-result.png
+│   └── 05-wager-menu.png
 └── recording.json
 ```
 
@@ -134,9 +145,19 @@ ignored by Git and excluded from packages and Docker contexts. `POKERDEMO_OUTPUT
 can choose a subdirectory beneath this workspace's `.local/recordings/`; each run
 still gets its own ID. No output is uploaded.
 
-The seeded scenario drives the actual server and public-only client consoles through
-normal streets, showdown, fold, all-in, rejected commands and disconnect. PokerEngine
-determines actions and results. The GIF replays the real PTY cast with a 1 fps cap.
+The seeded scenario drives the actual server and client consoles through normal
+streets, showdown, fold, all-in, rejected commands and disconnect. The first raise
+opens the same amount picker used in manual play and confirms the native minimum.
+
+By default, Alice and Bob each subscribe to their own permitted hand. The combined
+local GIF therefore shows both synthetic hands; neither client receives the other's
+private cards. The server dashboard and recording observer remain public. To record
+concealed hole cards, use `.venv/bin/pokerDemo record --hide-cards` or
+`POKERDEMO_RECORD_SHOW_CARDS=false make demo-record`. Explicit `--show-cards` overrides
+that environment setting. Recording enables colors only for its own child processes;
+it does not change the user's shell, fonts or terminal settings.
+
+PokerEngine determines actions and results. The GIF replays the real PTY cast with a 1 fps cap.
 Each PNG comes from an exact stable timestamp in the same cast using agg and lossless
 Pillow conversion. They are replay frames, not desktop screenshots.
 

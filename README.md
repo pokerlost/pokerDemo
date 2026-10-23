@@ -1,44 +1,98 @@
 # PokerDemo
 
-Local terminal demonstration of the installed PokerEngine Python API: one server,
-two independent clients, manual play and reproducible local recording. The engine
-owns poker rules and settlement; this repository owns transport and presentation.
+**A WebSocket poker server, a live terminal dashboard and two small player consoles.**
 
-## Prepare once
+PokerDemo demonstrates the installed [PokerEngine](https://github.com/pokerlost/pokerengine)
+Python API. The engine owns poker rules, legal actions and settlement. This application
+owns connections, typed messages, terminal interaction and local recording.
 
-The supplied engine wheel targets CPython 3.14 on Linux x86-64. Obtain the exact
-private artifact from its owner; it is not downloaded or built by demo commands.
-Install uv, tmux and asciinema agg separately. This host can use the already verified
-local tool cache as a fallback; see [prerequisites](docs/demo.md#prerequisites).
+| Layer | Library | Responsibility |
+| --- | --- | --- |
+| Transport | websockets | WebSocket connections and pushed table updates |
+| Contracts | Pydantic | Strict command, reply and snapshot models |
+| Console | Textual / Rich | Server dashboard, player tables and command input |
+| CLI / configuration | Typer / Pydantic Settings | Explicit commands and lazy settings |
+| Rules | Installed PokerEngine wheel | State transitions, validation and payouts |
+
+## Quick start
+
+Requires **CPython 3.14 on Linux x86-64**, `uv`, `tmux` and the owner-supplied
+`pokerengine-2.0.0.dev2-cp314-cp314-linux_x86_64.whl`. Recording also requires
+[asciinema agg](https://github.com/asciinema/agg). The private engine artifact is
+not downloaded automatically; [prerequisites and checksum](docs/demo.md#prerequisites)
+describe the exact dependency.
+
+From this repository root:
 
 ```bash
 python3.14 scripts/prepare.py --wheel /path/to/pokerengine-2.0.0.dev2-cp314-cp314-linux_x86_64.whl
+make doctor
+make demo
 ```
 
-Preparation verifies SHA256 and Python compatibility before installing the locked
-environment and this package non-editably. It does not build the native engine.
+Preparation verifies the wheel and installs the locked environment. `make demo`
+opens the server above Alice and Bob. **Select a player panel and press `S` to start.**
+Switch panels with `Ctrl+B`, then an arrow. `L` calls, `C` checks, `F` folds;
+`:` opens the command input and Escape returns to hotkeys. The [play guide](docs/demo.md#play)
+covers raises, showdown and the next hand.
 
-## Use
+## Play or record
 
-```bash
-make demo          # manual server and two clients
-make demo-record   # real scripted game, PTY capture, GIF and four frames
-make demo-stop     # stop only this workspace's demo session
+| Command | What happens |
+| --- | --- |
+| `make demo` | Opens an interactive game; you control both players. |
+| `make demo-attach` | Returns to an already running manual game. |
+| `make demo-stop` | Stops this workspace's manual demo session. |
+| `make demo-record` | Plays a scripted game in the background, prints progress and saves local files. |
+| `make demo-record-open` | Records, then opens the completed GIF in your local viewer. |
+
+**Recording does not open the game.** Allow about a minute for the scenario, then
+additional rendering time. Progress messages show the current stage. The command
+prints the GIF, four PNG frames and receipt paths when finished:
+
+```text
+.local/recordings/<run-id>/
+├── demo.gif
+├── frames/
+├── session.cast
+└── recording.json
 ```
 
-Recordings are private local files in `.local/recordings/<run-id>/`. Nothing is
-uploaded. `make demo-record` prints the GIF, four PNG paths and provenance receipt.
-Repeated recording does not install dependencies, build the engine or run tests.
+Recording uses a separate session and leaves a manual game alone. No recordings
+are uploaded or included in Git or distributions. See [recording and troubleshooting](docs/demo.md#record-a-game).
 
-Read the [demo guide](docs/demo.md), [protocol](docs/protocol.md),
-[client](docs/client.md), [architecture](docs/architecture.md) and
-[development workflow](docs/development.md). [Migration provenance](docs/migration-source.json)
-records source commits, original file hashes and licenses. Historical engine
-recordings remain in their original Git history and private backups.
+## How it fits together
 
-`make lint` is the daily gate. Full tests, typing and release acceptance are separate
-manual actions. This synthetic loopback demonstration has no production identity,
-TLS or real-money integration. The pinned wheel requires private artifact access;
-the repository is not yet a standalone public installation.
+```mermaid
+flowchart LR
+    Alice[Player console: Alice] <-->|WebSocket /ws| Server[Server + public dashboard]
+    Bob[Player console: Bob] <-->|WebSocket /ws| Server
+    Server --> Engine[Installed PokerEngine API]
+```
 
-Code is [MIT licensed](LICENSE); preserve [third-party notices](THIRD_PARTY_NOTICES.md).
+```text
+src/pokerdemo/
+├── cli.py          # thin Typer entry points
+├── settings.py     # explicit, lazy configuration
+├── game/           # engine orchestration and player sessions
+├── protocol/       # Pydantic wire contracts
+├── network/        # WebSocket server and client transport
+├── console/        # Textual applications and shared Rich presentation
+└── runtime/        # tmux lifecycle, recording, rendering and tools
+```
+
+## Documentation
+
+- 🎮 [Demo guide](docs/demo.md) — installation, controls, recording and recovery.
+- 🧩 [Architecture](docs/architecture.md) — component ownership and data flow.
+- 🔌 [Protocol](docs/protocol.md) · [Client](docs/client.md) — messages and console behavior.
+- 🛠️ [Development](docs/development.md) · [Versions](docs/versioning.md) · [Release boundary](docs/releases.md).
+
+This is a development demonstration with synthetic players and chips. It listens
+only on loopback and has no production authentication, TLS or persistence.
+The supplied wheel still requires private artifact access. Publishing source on
+`main` does not make this a stable release or establish full test acceptance.
+
+Code is [MIT licensed](LICENSE). Preserve [third-party notices](THIRD_PARTY_NOTICES.md)
+and [transfer provenance](docs/migration-source.json). Historical recordings remain
+in their original Git history and private backups.

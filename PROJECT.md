@@ -1,6 +1,6 @@
 # PokerDemo contract
 
-PokerDemo owns synthetic loopback JSON/TCP transport, a public server dashboard,
+PokerDemo owns synthetic loopback WebSocket transport, a public server dashboard,
 connection-bound player clients, a dedicated tmux lifecycle and local PTY recording.
 The installed `pokerengine==2.0.0.dev2` public Python API owns game rules, validation,
 legal ranges, transitions and settlement. Native sources are not copied here.

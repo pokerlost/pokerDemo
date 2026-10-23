@@ -1,34 +1,50 @@
-# PokerEngine terminal client
+# Player console
 
-`poker_client.py` uses curses for an automatically refreshed table and an editable
-command line. Transport, wire validation, input and rendering stay in Python;
-poker rules and legal ranges come from the server's native C++ engine.
+The small Textual client shows the table, turn, legal ranges, recent public activity
+and a command input. Rich renders the player rows. Poker rules and legal actions
+come from the server's installed native engine.
 
-## Start
+## Run a client
+
+With a server running on the default loopback endpoint:
 
 ```bash
-.venv/bin/python -m pokerdemo.client --player-id alice --seat 0 --private
+.venv/bin/pokerDemo client --player-id alice --seat 0 --private
 ```
 
-The server must already be running on loopback. `--host` and `--port` select its
-endpoint. An explicit player ID skips the setup wizard; without it, the existing
-interactive setup remains available. `--console` selects the retained line client.
+`--player-id` and `--seat` are required. `--host`, `--port` and `--stack` explicitly
+select the endpoint and buy-in; the default is `127.0.0.1:8765` and 1000 synthetic
+chips. The supplied CLI only accepts IPv4 loopback hosts. `--private` requires the
+server's private mode. Without it, the client displays public state only.
 
-The [canonical demo guide](demo.md#play) owns the key table, three-process
-commands, next-hand lifecycle, tmux controls and capture procedure.
+There is no setup wizard or alternate curses client. For the usual two-player
+layout, use `make demo`; the [demo guide](demo.md#play) owns the full key table.
 
-## Privacy and connection lifetime
+## Input and updates
 
-`--private` requests only the connection-bound player's `player_view()` and requires
-the server's explicit loopback private mode. The default is public-only; local
-recordings use that mode. Opponent cards and trusted `server_view()` never enter the
-client payload. Result messages contain only payout recipients, amounts and rake.
+After connecting and joining, the client subscribes to updates. A background reader
+validates replies and snapshots with Pydantic, correlates command IDs and retains the
+latest snapshot. Textual refreshes its widgets without polling the server for state.
+Updates continue while the user types.
 
-The client keeps polling while waiting or typing; a rejected command leaves the
-connection usable. A lost connection is displayed explicitly. `Q` or `:quit` closes
-its own socket; the server marks the player away and applies its documented native
-check/fold timeout policy. ASCII suit codes avoid a card-font dependency.
+Hotkeys work when the command input is not focused. Escape returns to that mode;
+`:` or Enter focuses input. Enter submits a command and returns to hotkeys. For
+example, type `raise 200` to request a final street commitment of 200. Rejections
+appear in the feedback line; they do not terminate the UI.
 
-> **Warning:** The example has no TLS or production authentication. IDs are synthetic seat identifiers, not credentials. Use loopback only.
+`Ctrl+Q` or the `quit` command exits this client and closes its connection. An
+unexpected server disconnect is shown in the feedback line. Start a new client to
+reconnect; there is no silent reconnect or local reconstruction of game state.
 
-See the [server protocol](protocol.md) and [architecture](architecture.md).
+## Views
+
+A private client receives only its connection-bound player's permitted view.
+Opponent cards and trusted engine state are not client payloads. The server monitor
+remains public. Recording clients intentionally hide all private cards.
+
+Cards use ASCII rank/suit codes such as `As`, `Kh`, `Qd`, `Jc`, so reading them does
+not require a special card-symbol font. Results display payout amounts and recipients.
+Player IDs are synthetic seat names, not credentials; a matching local reconnect
+can take over a seat in this demonstration.
+
+[Protocol](protocol.md) · [Architecture](architecture.md) · [Demo guide](demo.md)

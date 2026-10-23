@@ -59,7 +59,7 @@ def launch(
     detach: bool = False,
 ) -> None:
     """Open the real server above two human-controlled clients."""
-    from pokerdemo.session import launch as launch_session
+    from pokerdemo.runtime.session import launch as launch_session
 
     launch_session(configured(config, workspace=workspace, tmux=tmux), detach=detach)
 
@@ -69,7 +69,7 @@ def attach(
     config: Path | None = None, workspace: Path | None = None, tmux: str | None = None
 ) -> None:
     """Attach only to this workspace's demo session."""
-    from pokerdemo.session import DemoSession
+    from pokerdemo.runtime.session import DemoSession
 
     DemoSession(configured(config, workspace=workspace, tmux=tmux)).attach()
 
@@ -79,7 +79,7 @@ def stop(
     config: Path | None = None, workspace: Path | None = None, tmux: str | None = None
 ) -> None:
     """Stop only this workspace's demo session and its three application processes."""
-    from pokerdemo.session import DemoSession
+    from pokerdemo.runtime.session import DemoSession
 
     DemoSession(configured(config, workspace=workspace, tmux=tmux)).stop()
 
@@ -87,8 +87,8 @@ def stop(
 @app.command()
 def doctor(config: Path | None = None, workspace: Path | None = None) -> None:
     """Check installed prerequisites and the exact engine wheel without starting a game."""
-    from pokerdemo.session import verify_wheel
-    from pokerdemo.tools import resolve_tool, resolve_wheel
+    from pokerdemo.runtime.recording import verify_wheel
+    from pokerdemo.runtime.tools import resolve_tool, resolve_wheel
 
     settings = configured(config, workspace=workspace)
     artifact = verify_wheel(resolve_wheel(settings))
@@ -107,11 +107,12 @@ def record(
     tmux: str | None = None,
     agg: str | None = None,
     delay: float | None = None,
+    open_result: Annotated[bool, typer.Option("--open")] = False,
 ) -> None:
     """One command: actual PTY capture, official agg replay, unchanged PNG frames."""
-    from pokerdemo.render import render
-    from pokerdemo.session import record as record_session
-    from pokerdemo.tools import resolve_tool
+    from pokerdemo.runtime.recording import record as record_session
+    from pokerdemo.runtime.render import render
+    from pokerdemo.runtime.tools import resolve_tool
 
     settings = configured(
         config,
@@ -135,9 +136,63 @@ def record(
         datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
     )
     typer.echo(f"Local recording: {destination}")
+    typer.echo("[1/3] Playing an unattended game (~60 seconds); the game is not opened on screen.")
     record_session(settings, destination)
     frames = render(destination, renderer, settings.font_family)
     typer.echo(f"GIF: {destination / 'demo.gif'}")
     for frame in frames:
         typer.echo(f"Frame: {frame}")
     typer.echo(f"Receipt: {destination / 'recording.json'}")
+    typer.echo("Done. Open the GIF with your file viewer, or use make demo-record-open next time.")
+    if open_result:
+        typer.launch(str(destination / "demo.gif"))
+
+
+def loopback_host(host: str) -> str:
+    from ipaddress import IPv4Address
+
+    try:
+        address = IPv4Address(host)
+    except ValueError:
+        raise typer.BadParameter("Use an IPv4 loopback address, for example 127.0.0.1") from None
+    if not address.is_loopback:
+        raise typer.BadParameter("This demo only listens and connects on loopback")
+    return str(address)
+
+
+@app.command()
+def server(
+    host: str = "127.0.0.1",
+    port: Annotated[int, typer.Option(min=1, max=65535)] = 8765,
+    seed: int | None = None,
+    private: bool = False,
+    dashboard: bool = True,
+    auto_start_delay: float = 3600,
+    action_timeout: float = 300,
+) -> None:
+    """Run the WebSocket game server with its public Textual console."""
+    from pokerdemo.console.server import run_server
+    from pokerdemo.game.service import PokerApplication, ServerConfig
+
+    address = loopback_host(host)
+    options = ServerConfig(
+        seed=seed, auto_start_delay=auto_start_delay, action_timeout=action_timeout
+    )
+    run_server(PokerApplication(options, allow_private=private), address, port, dashboard=dashboard)
+
+
+@app.command()
+def client(
+    player_id: Annotated[str, typer.Option()],
+    seat: Annotated[int, typer.Option(min=0, max=9)],
+    host: str = "127.0.0.1",
+    port: Annotated[int, typer.Option(min=1, max=65535)] = 8765,
+    stack: Annotated[int, typer.Option(min=1)] = 1000,
+    private: bool = False,
+) -> None:
+    """Open a small Textual player console; the server pushes table updates."""
+    from pokerdemo.console.client import PlayerConsole
+    from pokerdemo.protocol.models import Join
+
+    Join(op="join", player_id=player_id, seat=seat, stack=stack)
+    PlayerConsole(loopback_host(host), port, player_id, seat, stack, private).run()

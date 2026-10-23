@@ -1,22 +1,54 @@
 # Development
 
-Use `dev`. Prepare the pinned environment once as described in the [README](../README.md).
-After changes run `make format` and `make lint`, review the complete diff and staged
-paths for secrets/local artifacts, then make an explicitly authorized dev commit/push.
-Main, test and existing tags are unchanged. An ordinary push runs no hosted CI.
+Develop on `dev` from this repository's exact root. Prepare the locked environment
+using [the README](../README.md), then keep changes within the owning package:
+game service, wire contract, network transport, console or runtime tooling.
 
-Before recording, push the committed source and explicitly reinstall changed demo
-code with `uv sync --locked --no-editable`. This builds only the small Python demo
-package. The native engine comes from the supplied wheel; it is never rebuilt here.
-The recorder compares installed demo files with the committed source and refuses a
-mismatch. `make demo-record` itself only launches and records the installed code.
+## Local change cycle
 
-`make test` and `make typecheck` are manual acceptance commands, not part of lint.
-The transferred protocol tests remain available in `tests/test_protocol.py`; native
-engine and public API tests stay with PokerEngine. Adapted foundation tests cover the
-actual settings/CLI contract. Their presence does not imply they were run.
+```bash
+make format
+make lint
+```
 
-Keep receipts and diagnostics in ignored local storage. A successful demo run proves
-that recorded scenario only; it does not establish full-suite, performance or production
-acceptance. See [versions](versioning.md), [releases](releases.md) and
-[migration source](migration-source.json).
+Lint performs Ruff checks and format verification. It does not install dependencies,
+start a game, run tests or build the engine. Review the full diff, staged paths and
+secrets before an authorized commit and explicit `git push origin dev`.
+Keep recordings, logs, wheels and private backups out of staged files.
+
+After changing application code, explicitly reinstall it before a recorded run:
+
+```bash
+uv sync --locked --no-editable --reinstall-package pokerdemo
+make demo-record
+```
+
+Recording requires clean committed source already pushed to the current `dev` or
+`main` branch. It compares installed package files against that commit. Reinstallation
+builds the small Python demo package; PokerEngine is installed from the pinned wheel
+and is not rebuilt here. Runtime recording itself performs no installation.
+
+## Checks and evidence
+
+`make test` and `make typecheck` are available as separate manual checks. Their
+presence does not imply they have run. Native engine/API tests remain with
+PokerEngine; this application's tests belong to its own service, wire and CLI
+boundaries. A recording is narrow integration evidence for its observed scenario.
+
+Keep reports under ignored local storage. Distinguish code implemented, lint result,
+observed manual behavior and checks not run. Do not describe a successful GIF as
+full-suite, performance or production acceptance.
+
+## Promotion
+
+Main receives reviewed source through an explicitly authorized promotion. Complete
+dev review and the agreed verification before promoting the same commit with a
+fast-forward only update. Preserve branch protections, `test` and existing tags;
+do not force-push or create a release implicitly.
+
+Each promotion requires its own decision. Main publication does not change the
+development version or imply stable release acceptance.
+No automatic hosted CI, artifact upload or deployment is configured here.
+
+[Architecture](architecture.md) · [Version policy](versioning.md) ·
+[Release boundary](releases.md) · [Transfer provenance](migration-source.json)

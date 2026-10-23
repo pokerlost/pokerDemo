@@ -1,126 +1,165 @@
-# Interactive local demo
+# Demo guide
+
+Use manual mode to play both sides, or recording mode to run a reproducible scenario
+and save a GIF. They are separate sessions with separate lifecycle state.
 
 ## Prerequisites
 
-Use CPython 3.14 on Linux x86-64 and the owner-supplied
-`pokerengine-2.0.0.dev2-cp314-cp314-linux_x86_64.whl`.
-Its required SHA256 is
-`13a1a57f6c61860cf1c1b89d1a4db624eda8d8cad132bdf7d61f0e94ab798ee3`.
-The build source is `b66af7c4a61715a16a2015c8e437cdd5207cc448`;
-transferred application source is recorded in [the manifest](migration-source.json).
+Use CPython 3.14 on Linux x86-64, `uv`, `tmux` and the owner-supplied
+`pokerengine-2.0.0.dev2-cp314-cp314-linux_x86_64.whl`. Recording also needs official
+asciinema `agg`. The required wheel SHA256 is:
 
-Run preparation once from this repository root:
+```text
+13a1a57f6c61860cf1c1b89d1a4db624eda8d8cad132bdf7d61f0e94ab798ee3
+```
+
+Its build source is `b66af7c4a61715a16a2015c8e437cdd5207cc448`.
+[Transfer provenance](migration-source.json) records the original application source.
+
+Run preparation from this repository root:
 
 ```bash
 python3.14 scripts/prepare.py --wheel /path/to/pokerengine-2.0.0.dev2-cp314-cp314-linux_x86_64.whl
 make doctor
 ```
 
-Preparation checks the supplied artifact and Python before copying it to ignored
-`.local/wheels/` and invoking `uv sync --locked --no-editable`. It installs locked
-runtime and developer dependencies, with no native build or system changes.
+Preparation checks the wheel name, checksum, ABI and current interpreter. It copies
+the artifact to ignored `.local/wheels/`, then runs `uv sync --locked --no-editable --reinstall-package pokerdemo`.
+The locked dependencies and this Python application are installed; the native
+engine is not rebuilt. Runtime commands never install dependencies or tools.
 
-Use installed `tmux` and official asciinema `agg`. Discovery is explicit
-`POKERDEMO_TMUX` / `POKERDEMO_AGG`, then PATH, then the existing checksum-verified
-cache under `${XDG_CACHE_HOME:-$HOME/.cache}/codex_dev_team/tools/` (`tmux-3.6a`
-and `agg-1.9.0`). The cache is an optional host fallback, never downloaded by the app.
-A missing prerequisite fails with the relevant override. No fonts are installed;
-`POKERDEMO_FONT_FAMILY` selects an available renderer font.
+Tool discovery checks `POKERDEMO_TMUX` / `POKERDEMO_AGG`, then PATH, then an optional
+existing checksum-verified cache under
+`${XDG_CACHE_HOME:-$HOME/.cache}/codex_dev_team/tools/`. The fallback is not downloaded.
+Missing tools produce an error with the relevant override. `POKERDEMO_FONT_FAMILY`
+selects an already installed renderer font; no fonts are installed by this project.
 
-## Start and stop
+## Open the game
 
 ```bash
 make demo
+```
+
+Use a terminal around 160 columns by 50 rows. The public server dashboard is above
+Alice and Bob. The launcher selects a free loopback port and focuses Alice.
+**Press `S` in a player panel to start the hand.**
+
+Switch panels with `Ctrl+B`, then an arrow. `Ctrl+B`, then `D` detaches and leaves
+the manual game running. Return or stop it from another terminal:
+
+```bash
 make demo-attach
 make demo-stop
 ```
 
-Use a terminal of about 160 columns by 50 rows to see all three dashboards clearly.
-The server is above two independent clients. Switch panes with `Ctrl+B`, then an
-arrow. `Ctrl+B`, then `D` detaches; `demo-attach` returns. Only this workspace's
-`.local/demo/tmux.sock` and `pokerdemo` session are affected by stop. Closing or
-interrupting a foreground launch stops its own session; an ordinary detach keeps
-it running. `DEMO_PYTHON=/path/to/python` explicitly selects another installed environment.
+Stop addresses only this workspace's `.local/demo/tmux.sock` and `pokerdemo` session.
+Other tmux sessions and the recording socket are separate. An interrupted launcher
+cleans up its own session; an ordinary detach deliberately keeps it running.
 
-The same apps can be run in three terminals with an explicit common loopback port:
+For three independent terminals, use the same explicit port:
 
 ```bash
-.venv/bin/python -m pokerdemo.server --dashboard --private --seed 42 --auto-start-delay 3600 --action-timeout 300
-.venv/bin/python -m pokerdemo.client --player-id alice --seat 0 --private
-.venv/bin/python -m pokerdemo.client --player-id bob --seat 1 --private
+.venv/bin/pokerDemo server --private --seed 42 --port 8765
+.venv/bin/pokerDemo client --player-id alice --seat 0 --private --port 8765
+.venv/bin/pokerDemo client --player-id bob --seat 1 --private --port 8765
 ```
 
-The default endpoint is `127.0.0.1:8765`; the launcher selects a free loopback port.
-`--console` on a client keeps the line-command interface available.
+The server console accepts `status`, `start`, `settle` and `quit` followed by Enter.
+Player actions belong to the player consoles. `server --no-dashboard` runs a
+headless WebSocket listener instead. Defaults use `127.0.0.1:8765/ws`.
 
 ## Play
 
-Once both players connect, either presses `S` to start. Each client sees only its
-own private cards and the engine's permitted table projection. The server monitor
-always uses the public view and never displays hole cards. Card codes are ASCII:
-`As`, `Kh`, `Qd`, `Jc`; the suit letters remain readable without card-symbol fonts.
+Each manual player sees only their own permitted private cards. The server dashboard
+always shows public state. The native engine provides legal actions and ranges.
 
-| Action | Keys | Context | Note |
-| --- | --- | --- | --- |
-| Start / next hand | `S` / `N` | Ready or finished table | Native lifecycle validates the request. |
-| Fold / check / call | `F` / `C` / `L` | Your turn | The displayed native legal actions decide availability. |
-| All-in | `A` | Your turn with a legal bet/raise range | Sends the native range maximum; no separate poker rules. |
-| Bet or raise | `:bet TOTAL` / `:raise TOTAL`, Enter | Your turn | Inclusive limits are shown; TOTAL is the final street commitment. |
-| Settle showdown | `D` | Showdown | C++ calculates payouts; clients display only amounts and recipients. |
-| Enter any command | `:` or Enter | Table | `state`, `legal`, `start`, `settle`, `result` also work. |
-| Cancel input | Escape | Command line | The table continues refreshing while typing. |
-| Exit | `Q` or `:quit` | Client | Disconnect is visible to the server and other player. |
+| Action | Keys or input |
+| --- | --- |
+| Start / next hand | `S` / `N` |
+| Call / check / fold | `L` / `C` / `F` |
+| All-in | `A` |
+| Bet / raise | `:`, type `bet TOTAL` or `raise TOTAL`, then Enter |
+| Settle showdown | `D` |
+| Enter a command | `:` or Enter |
+| Return to hotkeys | Escape |
+| Exit one console | `Ctrl+Q`, or type `quit` |
 
-The table polls while waiting and while entering a command. Out-of-turn commands
-are rejected locally; the server independently enforces the connection's identity
-and turn. Malformed amounts and native rejections display a message without
-changing game state. A disconnected or timed-out current player is checked when
-native legal actions permit it, otherwise folded. Polling does not renew the turn
-deadline. Starting the next hand remains an explicit player action after settlement.
+Hotkeys apply when input is not focused. Escape is useful if a letter appears in the
+input box instead of triggering an action. Commands include `start`, `check`, `call`,
+`fold`, `all_in`, `bet TOTAL`, `raise TOTAL`, `settle`, `state`, `legal` and `result`.
+Bet and raise totals mean the final street commitment. At showdown, settle before
+starting the next hand. The UI reports invalid input or native rejections.
 
-> **Warning:** This is a loopback-only synthetic demonstration without TLS or production authentication. Player IDs are not credentials; a local reconnect can take over the matching example seat. Do not use real money, tokens or personal data.
+If the current player disconnects or times out, the server checks when the native
+legal actions permit it, otherwise folds. Reading updates does not renew the action
+deadline. Player IDs are local seat identifiers, not credentials.
 
-## Local recording
-
-First lint, review, commit and push dev; reinstall changed application code explicitly
-with `uv sync --locked --no-editable`. Then:
+## Record a game
 
 ```bash
 make demo-record
 ```
 
-This one command runs the actual server and two public-only clients, enters commands
-through tmux, captures its real PTY, replays it with agg and selects four frames:
+**This is an unattended background run, not an interactive window.** It prints
+three stages: play, render GIF, extract frames. Allow about 60 seconds for play and
+roughly 20–40 seconds for GIF rendering, plus frame extraction; actual time depends
+on the host. Wait for the final `Done` and output paths.
+
+To open the finished GIF automatically:
+
+```bash
+make demo-record-open
+```
+
+The local viewer is launched only after successful recording and rendering. Both
+commands use `.local/demo-record/tmux.sock`, independent of the manual game.
+
+Each run creates:
 
 ```text
 .local/recordings/<run-id>/
-  session.cast
-  tmux.typescript
-  demo.gif
-  frames/01-connected.png
-  frames/02-action.png
-  frames/03-late-street.png
-  frames/04-result.png
-  recording.json
+├── session.cast
+├── tmux.typescript
+├── demo.gif
+├── frames/
+│   ├── 01-connected.png
+│   ├── 02-action.png
+│   ├── 03-late-street.png
+│   └── 04-result.png
+└── recording.json
 ```
 
-Additional plain pane captures preserve diagnostics. `POKERDEMO_OUTPUT_ROOT` may
-select another directory beneath this workspace's `.local/recordings/`; each run
-gets a unique ID. All artifacts remain ignored by Git and excluded from packages
-and Docker contexts. No media are linked as public README images or uploaded.
+Plain pane captures may also be retained for diagnostics. All files remain local,
+ignored by Git and excluded from packages and Docker contexts. `POKERDEMO_OUTPUT_ROOT`
+can choose a subdirectory beneath this workspace's `.local/recordings/`; each run
+still gets its own ID. No output is uploaded.
 
-The seeded synthetic scenario covers normal streets/showdown, a fold, all-in,
-invalid amount/input, out-of-turn rejection and disconnect. The engine determines
-legal actions and results. Receipt observations and completion flags show what
-actually happened. Both recorded clients hide private cards; manual clients retain
-their own permitted views. The GIF preserves the recording timeline with a 1 fps cap
-to group terminal redraws.
-The four PNGs use agg `--select` at stable timestamps from the same `session.cast`,
-then lossless Pillow conversion. They are PTY replay frames, not desktop screenshots.
+The seeded scenario drives the actual server and public-only client consoles through
+normal streets, showdown, fold, all-in, rejected commands and disconnect. PokerEngine
+determines actions and results. The GIF replays the real PTY cast with a 1 fps cap.
+Each PNG comes from an exact stable timestamp in the same cast using agg and lossless
+Pillow conversion. They are replay frames, not desktop screenshots.
 
-The recorder checks clean committed source, exact installed demo files, engine wheel
-metadata/bytes and tool hashes before and after capture. Failure and completion stop
-its own session. A successful run is narrow manual demonstration verification;
-full tests, typing, build acceptance and CI remain separate.
+The receipt separates capture and rendering completion, records observations and
+hashes the outputs. Source must be committed, clean and pushed on `dev` or `main`;
+installed application files must match it. The engine wheel and tool identity are
+checked as part of the run. Capture completion or failure stops the recording session.
 
-[Protocol](protocol.md) · [Client](client.md) · [Architecture](architecture.md)
+## Troubleshooting
+
+| Symptom | What to do |
+| --- | --- |
+| Recording seems idle | Read the stage message; it runs in the background. Wait for `Done`, then open the printed GIF path. |
+| A server remains after recording | A manual game may still be running independently. Use `make demo-attach` or `make demo-stop` for that session. |
+| The table is waiting | Select Alice or Bob, press Escape, then `S`. |
+| Hotkeys type letters | Press Escape to leave command input. |
+| Demo already exists | Use `make demo-attach`, or stop that manual session before starting another. |
+| Installed source differs | After reviewing and pushing changes, explicitly run `uv sync --locked --no-editable --reinstall-package pokerdemo`. |
+| Wheel/tool check fails | Follow the named prerequisite error; demo commands never install or silently replace it. |
+
+An observed recording verifies only that scenario. Full tests, typing, packaging and
+CI remain separate. This is a synthetic loopback demo without TLS, production
+authentication, payments or deployment.
+
+[Client](client.md) · [Protocol](protocol.md) · [Architecture](architecture.md) ·
+[Development](development.md)

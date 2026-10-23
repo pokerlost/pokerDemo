@@ -46,7 +46,16 @@ def main() -> None:
         shutil.copyfile(source, destination)
     print(f"Verified engine wheel: {SHA256}", flush=True)
     subprocess.run(
-        ["uv", "sync", "--locked", "--no-editable", "--python", sys.executable],
+        [
+            "uv",
+            "sync",
+            "--locked",
+            "--no-editable",
+            "--reinstall-package",
+            "pokerdemo",
+            "--python",
+            sys.executable,
+        ],
         check=True,
         env={**os.environ, "UV_CACHE_DIR": str(root / ".local/uv-cache")},
     )
